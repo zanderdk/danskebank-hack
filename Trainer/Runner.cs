@@ -26,20 +26,20 @@ namespace Trainer
             for(int i = 0; i < data.Count - 1; i++)
             {
                 Game.TradeAction action = Game.TradeAction.DO_NOTHING;
-                if(game.price > game.next && game.canSell) { action = Game.TradeAction.SELL; }
-                if (game.price < game.next && game.canBuy) { action = Game.TradeAction.BUY; }
+                if(game.price >= game.next && game.canSell) { action = Game.TradeAction.SELL; }
+                if (game.price <= game.next && game.canBuy) { action = Game.TradeAction.BUY; }
                 game.UseTurn(action);
                 bestStrat.Add(action);
             }
 
             Game godGame = new Game(data);
-            double lastBuy = 0;
+            double lastPrice = 0;
             while(!godGame.IsGameLost() && !godGame.IsGameWon())
             {
                 Game.TradeAction action = Game.TradeAction.DO_NOTHING;
-                if (godGame.price > lastBuy && godGame.canSell) action = Game.TradeAction.SELL;
-                if (godGame.canBuy) { lastBuy = godGame.price; action = Game.TradeAction.BUY; }
-
+                if (godGame.price <= lastPrice && godGame.canSell) action = Game.TradeAction.SELL;
+                else if (godGame.price >= lastPrice && godGame.canBuy) action = Game.TradeAction.BUY;
+                lastPrice = godGame.price;
                 godGame.UseTurn(action);
             }
 
@@ -52,20 +52,20 @@ namespace Trainer
                 NumInputNeurons = GameEvaluation.INPUTSIZE,
                 NumOutputNeurons = 1,
                 NumHiddenLayers = 2,
-                NumHiddenNeurons = 3,
+                NumHiddenNeurons = GameEvaluation.INPUTSIZE,
                 SummationFunction = new SimpleSummation(),
                 ActivationFunction = new TanhActivationFunction()
             };
             GenerationConfigurationSettings generationSettings = new GenerationConfigurationSettings
             {
-                UseMultithreading = false,
-                GenerationPopulation = 100
+                UseMultithreading = true,
+                GenerationPopulation = 10
             };
             EvolutionConfigurationSettings evolutionSettings = new EvolutionConfigurationSettings
             {
-                NormalMutationRate = 0.45,
+                NormalMutationRate = 0.1,
                 HighMutationRate = 0.5,
-                GenerationsPerEpoch = 100,
+                GenerationsPerEpoch = 1000,
                 NumEpochs = 10000
             };
             MutationConfigurationSettings mutationSettings = new MutationConfigurationSettings
@@ -81,7 +81,7 @@ namespace Trainer
             INeuralNetworkFactory factory = NeuralNetworkFactory.GetInstance(SomaFactory.GetInstance(networkConfig.SummationFunction), AxonFactory.GetInstance(networkConfig.ActivationFunction), SynapseFactory.GetInstance(new RandomWeightInitializer(new Random())), SynapseFactory.GetInstance(new ConstantWeightInitializer(1.0)), random);
             IBreeder breeder = BreederFactory.GetInstance(factory, random).Create();
             IMutator mutator = MutatorFactory.GetInstance(factory, random).Create(mutationSettings);
-            IEvalWorkingSet history = EvalWorkingSetFactory.GetInstance().Create(50);
+            IEvalWorkingSet history = EvalWorkingSetFactory.GetInstance().Create(100);
             IEvaluatableFactory evaluatableFactory = new GameEvaluationFactory();
 
             var GAFactory = GeneticAlgorithmFactory.GetInstance(evaluatableFactory);

@@ -15,7 +15,7 @@ namespace Trainer
         private List<double> his = new List<double>();
         private readonly Game _game;
         private readonly INeuralNetwork _neuralNet;
-        public static int INPUTSIZE = 30;
+        public static int INPUTSIZE = 10;
         
 
         public GameEvaluation(Game game, INeuralNetwork neuralNet)
@@ -39,10 +39,9 @@ namespace Trainer
 
                 if (his.Count >= INPUTSIZE - 1)
                 {
-                    if (his.Count > INPUTSIZE - 1) his.RemoveAt(0);
-                    for (double i = 0.75; i < 1.25; i += 0.05)
+                    if (his.Count >= INPUTSIZE) his.RemoveAt(0);
+                    for (double i = 0.75; i < 1.25; i += 0.01)
                     {
-                        if (his.Count > INPUTSIZE - 1) his.RemoveAt(0);
                         nextPrice = priceNow * i;
                         his.Add(nextPrice);
                         _neuralNet.SetInputs( his.ToArray() );
@@ -53,10 +52,10 @@ namespace Trainer
                             bestProb = nextProb;
                             bestPrice = nextPrice;
                         }
-                        //if (nextPrice > 0.5 && _game.canBuy) action = Game.TradeAction.BUY;
-                        //else if (nextPrice <= 0.5 && _game.canSell) action = Game.TradeAction.SELL;
+                        his.RemoveAt(INPUTSIZE - 1);
                     }
-                    if (bestPrice > _game.price && _game.canBuy) action = Game.TradeAction.BUY;
+
+                    if (bestPrice >= _game.price && _game.canBuy) action = Game.TradeAction.BUY;
                     else if (bestPrice < _game.price && _game.canSell) action = Game.TradeAction.SELL;
                 }
 

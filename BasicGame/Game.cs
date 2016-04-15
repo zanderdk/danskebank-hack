@@ -8,6 +8,8 @@ namespace BasicGame
 {
     public class CheatGame : Game
     {
+        public int dataSize { get { return _data.Count(); } }
+
         public double next { get { return _data[index + 1]; } }
 
         public CheatGame(List<double> data): base(data) { }

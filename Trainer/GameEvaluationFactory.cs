@@ -17,12 +17,12 @@ namespace Trainer
      
         public static List<double> LoadJson()
         {
-            using (StreamReader r = new StreamReader("C:/Users/zander/Documents/BlackBox/javascript/src/data/AAPL.json"))
+            using (StreamReader r = new StreamReader("C:/Users/Hutli/Documents/BlackBox/javascript/src/data/INTC.json"))
             {
                 string json = r.ReadToEnd();
                 firstItem array = JsonConvert.DeserializeObject<firstItem>(json);
                 IEnumerable<Item> arr = array.Prices;
-                return arr.Select(itm => itm.Value).Take(200).ToList();
+                return arr.Select(itm => itm.Value).ToList();
             }
         }
 
